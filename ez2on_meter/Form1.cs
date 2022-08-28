@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 // 추가
@@ -27,7 +22,7 @@ namespace ez2on_meter
         /// <summary>
         /// EZ2ON Process Name
         /// </summary>
-        private readonly static string m_ro_strEZ2ONProcessName = "EZ2ON";
+        private const string m_const_strEZ2ONProcessName = "EZ2ON";
 
         /// <summary>
         /// EZ2ON Point
@@ -82,6 +77,12 @@ namespace ez2on_meter
 
             button_start.Enabled = true;
             button_stop.Enabled = false;
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Ver ");
+            sb.Append(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString().Substring(0, 3));
+
+            label_version.Text = sb.ToString();
         }
 
         /// <summary>
@@ -97,7 +98,7 @@ namespace ez2on_meter
 
             foreach (Process process in processes)
             {
-                if (process.ProcessName.Contains(m_ro_strEZ2ONProcessName))
+                if (process.ProcessName.Contains(m_const_strEZ2ONProcessName))
                 {
                     iFlag = 0;
                     break;
@@ -112,7 +113,7 @@ namespace ez2on_meter
                 button_start.Enabled = false;
                 button_stop.Enabled = true;
                 label_message.ForeColor = Color.Green;
-                label_message.Text = "START!";
+                label_message.Text = "PROCESSING...";
                 timer.Start();
                 timer_position.Start();
             }
@@ -167,10 +168,10 @@ namespace ez2on_meter
         /// </summary>
         private void UpdatePosition()
         {
-            GetWindowPos(FindWindow(null, m_ro_strEZ2ONProcessName), ref m_pointEZ2ON, ref m_sizeEZ2ON);
+            GetWindowPos(FindWindow(null, m_const_strEZ2ONProcessName), ref m_pointEZ2ON, ref m_sizeEZ2ON);
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(m_ro_strEZ2ONProcessName);
+            sb.Append(m_const_strEZ2ONProcessName);
             sb.Append(" X : ");
             sb.Append(m_pointEZ2ON.X.ToString("D4"));
             sb.Append(", Y : ");
@@ -266,9 +267,12 @@ namespace ez2on_meter
 
                 if (m_form2 != null)
                 {
-                    Size size = new Size(bitmap.Width + 5, bitmap.Height + 30);
+                    Size size = new Size(bitmap.Width, bitmap.Height + 30);
                     m_form2.Size = size;
                 }
+
+                label_message.ForeColor = Color.Green;
+                label_message.Text = "MEMORY STREAM OK!";
             }
             catch (Exception)// ex)
             {
@@ -327,8 +331,8 @@ namespace ez2on_meter
         /// <param name="class_name"></param>
         /// <param name="window_name"></param>
         /// <returns>Window Handler</returns>
-        [DllImport("USER32.DLL", SetLastError = true)]
-        public static extern IntPtr FindWindow(string class_name, string window_name);
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr FindWindow(string class_name, string window_name);
 
         /// <summary>
         /// Window Position 반환
